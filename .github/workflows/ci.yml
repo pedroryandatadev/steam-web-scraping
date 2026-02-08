@@ -1,0 +1,44 @@
+name: Steam Price Monitor
+
+on:
+  schedule:
+    - cron: '0 13 * * *' # Every day at 10:00 AM (Brasilia Time)
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Reset price history on the first day of each month
+      - name: Monthly History Reset
+        run: |
+          DAY=$(date +%d)
+          if [ "$DAY" == "01" ]; then
+            echo "First day of the month. Resetting history..."
+            echo "{}" > price_history.json
+          fi
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Execute Script
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python main.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add price_history.json
+          git commit -m "Update price history [skip ci]" || echo "No changes to commit"
+          git push origin main
