@@ -49,7 +49,7 @@ The official API documentation can be found both through the [Steam Community](h
 
 Product prices may vary depending on the configured region and currency. To handle this, the project uses specific variables that help identify regions through the `cc` (country code) and `l` (language) parameters. Some regional identifiers are listed below; if your region is not included, it is recommended to consult the official API documentation to obtain the corresponding codes.
 
-```
+```bash
 # Change to your country
 
 CONFIG_COUNTRY = {
@@ -74,6 +74,20 @@ To change the search region, use the codes below in the `cc` and `l` parameters 
 
 # Architecture
 
+The project follows a modular architecture, where each file has a single, well-defined responsibility. This keeps the code organized, easy to maintain, and simple to test.
+
+<p align="center">
+  <img src="img/previews/modular_architecture.png" alt="Architecture Preview" >
+</p>
+
+`config.py` acts as the project's central foundation — all other modules depend on it, but none depend on each other. Only `main.py` knows about all of them, coordinating: fetch → decide → notify → save.
+ 
+This separation means that if the Steam API changes, only `steam_api.py` needs to be updated. If you want to switch from Telegram to another platform, only `telegram_bot.py` needs to change — nothing else is affected.
+
+> Check out [Real Python — Modular Programming](https://realpython.com/python-modules-packages/) for more information.
+
+## Integration Telegram
+
 <p align="center">
   <img src="img/previews/architecture-preview.jpg" alt="Architecture Preview" >
 </p>
@@ -83,6 +97,16 @@ The project adopts a simple integration architecture between two platforms: __Gi
 Through __GitHub Actions__, an innovative __CI/CD__ logic ensures the project's periodic execution, as defined in the `ci.yml` configuration file.
 
 Telegram, in conjunction with BotFather, acts exclusively as the interface for viewing notifications of promotions defined by the project. If you are not familiar with creating bots on Telegram or generating API keys, we recommend following the official [Telegram Documentation Guide](https://core.telegram.org/bots/tutorial).
+
+# Unit Testing with pytest and Mock
+ 
+A unit test verifies whether a function works correctly in **isolation**, without relying on anything external — such as APIs, the internet, or files on disk.
+ 
+**Mock** is a fake object that replaces these dependencies during the test, preventing real functions from being executed and avoiding unnecessary consumption of external API tokens.
+ 
+The `@patch` decorator automates this swap: it replaces the real object with the mock before the test and restores the original right after, with no risk of contaminating other tests and no need to install extra libraries.
+ 
+> Check out the [official unittest.mock documentation](https://docs.python.org/3/library/unittest.mock.html) for more information.
 
 ## LICENSE
 

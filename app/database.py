@@ -2,16 +2,13 @@ import json
 import os
 from app.config import DB_FILE
 
-# Database functions to load and save the history of sent alerts
+# Loads the history of sent alerts from the JSON file. If the file doesn't exist, it returns an empty dictionary.
 def load_history():
-    # Reads the history from the JSON file. Returns empty dict if file doesn't exist.
-    if os.path.exists(DB_FILE):
+    try:
         with open(DB_FILE, "r") as f:
-            try:
-                return json.load(f)
-            except:
-                return {}
-    return {}
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
 
 # Saves the updated history dictionary to the JSON file.
 def save_history(history):

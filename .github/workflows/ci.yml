@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  run-monitor:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -17,6 +17,27 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Unit Tests
+        run: pytest tests/ -v
+
+  run-monitor:
+    runs-on: ubuntu-latest
+    needs: test # Only runs if all tests pass
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
       # Reset price history on the first day of each month
       - name: Monthly History Reset
         run: |
@@ -25,9 +46,6 @@ jobs:
             echo "First day of the month. Resetting history..."
             echo "{}" > price_history.json
           fi
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
 
       - name: Execute Script
         env:
